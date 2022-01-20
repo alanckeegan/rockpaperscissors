@@ -28,8 +28,9 @@ contract RockPaperScissors {
         require(players.length < 2, "Game is full, wait for current players to finish");
 
         // Make sure person didn't hit join twice and play themselves
-        require(players[0].playerAddress != msg.sender, "You're already in the game");
-
+        if(players.length == 1){
+            require(players[0].playerAddress != msg.sender, "You're already in the game");
+        }
         // Require bet
         require(gameCurrency.transferFrom(msg.sender, address(this), betAmount), 'Did not receive wager');
 
@@ -59,7 +60,7 @@ contract RockPaperScissors {
         } else if (diff == 1 || diff == -2) {
             require(gameCurrency.transfer(players[0].playerAddress, gameCurrency.balanceOf(address(this))), 'Payout failed');
         } else {
-            require(gameCurrency.transfer(players[0].playerAddress, gameCurrency.balanceOf(address(this))), 'Payout failed');
+            require(gameCurrency.transfer(players[1].playerAddress, gameCurrency.balanceOf(address(this))), 'Payout failed');
         }
 
         // reset game
