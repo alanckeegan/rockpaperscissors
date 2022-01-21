@@ -22,6 +22,11 @@ describe("RockPaperScissors", function () {
     await rockPaperScissors.connect(player1).joinAndPlay(1)
   }
 
+  const player1JoinsWithInvalidAction = async() => {
+    await dai.connect(player1).approve(rockPaperScissors.address, ethers.utils.parseEther('1'))
+    await rockPaperScissors.connect(player1).joinAndPlay(4);
+  }
+
   const player2JoinsWithRock = async() => {
     await dai.connect(player2).approve(rockPaperScissors.address, ethers.utils.parseEther('1'))
     await rockPaperScissors.connect(player2).joinAndPlay(0)
@@ -129,6 +134,21 @@ describe("RockPaperScissors", function () {
 
     })
 
+    describe('Join with invalid game action', () => {
+
+
+      it("Should throw error", async () =>  {
+        try {
+          await player1JoinsWithInvalidAction();
+        } catch (e) {
+          assert.include(e.message, "revert");
+          return;
+        }
+        assert.isOk(false);
+      })
+
+    })
+
     describe('When second player joins', () => {
 
       it("Rock beats scissors!", async () => {
@@ -164,6 +184,15 @@ describe("RockPaperScissors", function () {
         await player1JoinsWithPaper();
         await player2JoinsWithScissors();
         assert.strictEqual(await dai.balanceOf(player2Addr), BigInt(p2StartingDai) + BigInt(ethers.utils.parseEther('1')));
+      });
+
+      it("Tie splits pot!", async () => {
+        const p2StartingDai = await dai.balanceOf(player2Addr)
+        const p1StartingDai = await dai.balanceOf(player1Addr)
+        await player1JoinsWithRock();
+        await player2JoinsWithRock();
+        assert.strictEqual(await dai.balanceOf(player2Addr), p2StartingDai);
+        assert.strictEqual(await dai.balanceOf(player1Addr), p1StartingDai);
       });
 
     })

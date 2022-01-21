@@ -9,28 +9,31 @@ contract RockPaperScissors {
     uint public betAmount;
     Player[] public players;
     struct Player {
+        // I know using int instead of uint looks weird, but it will make sense when I determineWinner()
         address playerAddress;
         int gameAction;
     }
 
     // Construtor function sets what currency can be bet at deployment
-    // And what the betting minimum is
+    // And what the bet amount is (went with a fixed bet amount)
     constructor(address _gameCurrencyAddress, uint _betAmount) {
         gameCurrency = IERC20(_gameCurrencyAddress);
         betAmount = _betAmount;
     }
 
-    // Going to do single funciton to join and play 
+    // Going to do single function to join, bet, and play 
     // Realistically very cheatable...second player could see first player's move on chain
     function joinAndPlay(int _gameAction) external {
 
         // Make sure there aren't already two players
+        // Shouldn't ever happen but dunno, maybe a transaction could get stuck?
         require(players.length < 2, "Game is full, wait for current players to finish");
 
-        // Make sure person didn't hit join twice and play themselves
+        // Make sure person didn't hit join twice and try to play themselves
         if(players.length == 1){
             require(players[0].playerAddress != msg.sender, "You're already in the game");
         }
+
         // Require bet
         require(gameCurrency.transferFrom(msg.sender, address(this), betAmount), 'Did not receive wager');
 
